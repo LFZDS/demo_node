@@ -5,7 +5,8 @@ var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 var fs = require('fs');
 
-var indexRouter = require('./routes/index');
+var collectionRouter = require('./routes/collection');
+var collection2Router = require('./routes/collection2');
 var usersRouter = require('./routes/users');
 
 var app = express();
@@ -21,12 +22,20 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/', indexRouter);
+app.use('/', collectionRouter);
+app.use('/collection', collectionRouter);
+app.use('/collection2', collection2Router);
 app.use('/users', usersRouter);
 
-// 共享数据
-app.locals.data1 = 11212;
+var MongoClient = require('mongodb').MongoClient;
+var url = 'mongodb://localhost';
+MongoClient.connect(url, function (err, db) {
+    // 共享数据
+    app.locals.db = db;
+});
 
+// 共享数据
+app.locals.ha = 99;
 // express 会对中间件参数判断，如果是4个，就当成错误处理中间件
 
 // catch 404 and forward to error handler
